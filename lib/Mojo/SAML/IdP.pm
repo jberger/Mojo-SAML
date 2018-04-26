@@ -31,13 +31,13 @@ sub entity {
 
 sub from_url {
   my ($self, $url) = @_;
-  my $dom = $self->ua->get($url)->result->dom;
-  return $self->metadata($dom);
+  my $dom = $self->ua->get($url)->result->body;
+  return $self->from_xml($dom);
 }
 
 sub from_xml {
   my ($self, $dom) = @_;
-  $dom = Mojo::DOM->new("$dom")
+  $dom = Mojo::DOM->new->xml(1)->parse("$dom")
     unless $dom->$isa('Mojo::DOM');
   return $self->metadata($dom);
 }
