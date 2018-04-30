@@ -10,12 +10,14 @@ my $isa = sub {
   my ($obj, $class) = @_;
   Scalar::Util::blessed($obj) && $obj->isa($class);
 };
-my $md = 'urn:oasis:names:tc:SAML:2.0:metadata';
-my $ds = 'http://www.w3.org/2000/09/xmldsig#';
+my %ns = (
+  md => 'urn:oasis:names:tc:SAML:2.0:metadata',
+  ds => 'http://www.w3.org/2000/09/xmldsig#',
+);
 
 has entity_id => sub {
   my $dom = shift->metadata;
-  my $desc = $dom->find('EntityDescriptor[entityID]')->grep(sub{ $_->namespace eq $md });
+  my $desc = $dom->find('md|EntityDescriptor[entityID]', %ns);
   die 'Multiple EntityDescriptor elements found' if $desc->size > 1;
   die 'No EntityDescriptor elements found' if $desc->size < 1;
   return $desc->[0]->{entityID};
@@ -44,20 +46,18 @@ sub from_xml {
 
 sub location_for {
   my ($self, $service, $binding) = @_;
-  $binding = "urn:oasis:names:tc:SAML:2.0:bindings:$binding" unless $binding =~ /^\Qurn:oasis:names:tc:SAML:2.0:bindings:/;
-  my $elem = $self->entity->at(qq{IDPSSODescriptor > ${service}[Binding="$binding"][Location]});
-  return undef unless $elem && $elem->namespace eq $md;
+  $binding = "urn:oasis:names:tc:SAML:2.0:bindings:$binding"
+    unless $binding =~ /^\Qurn:oasis:names:tc:SAML:2.0:bindings:/;
+  my $elem = $self->entity->at(qq!md|IDPSSODescriptor > md|${service}[Binding="$binding"][Location]!, %ns) || {};
   return $elem->{Location};
 }
 
 sub key_for {
   my ($self, $use) = @_;
   $use = Mojo::Util::xml_escape $use;
-  my $elem = $self->entity->at(qq<IDPSSODescriptor KeyDescriptor[use="$use"]>);
-  return undef unless $elem && $elem->namespace eq $md;
-  my $key_elem = $elem->at(q{KeyInfo > X509Data > X509Certificate});
-  return undef unless $key_elem && $key_elem->namespace eq $ds;
-  my $key = Mojo::Util::trim $key_elem->text;
+  my $s = qq!md|IDPSSODescriptor > md|KeyDescriptor[use="$use"] > ds|KeyInfo > ds|X509Data > ds|X509Certificate!;
+  return undef unless my $elem = $self->entity->at($s, %ns);
+  my $key = Mojo::Util::trim $elem->text;
   $key = Mojo::Util::b64_encode(Mojo::Util::b64_decode($key), ''); # clean up key
   return "-----BEGIN CERTIFICATE-----\n$key\n-----END CERTIFICATE-----\n";
 }
@@ -65,8 +65,7 @@ sub key_for {
 sub _formats {
   my $self = shift;
   return $self->entity
-    ->find(q<IDPSSODescriptor NameIDFormat>)
-    ->grep(sub{ $_->namespace eq $md })
+    ->find(q!md|IDPSSODescriptor md|NameIDFormat!, %ns)
     ->map(sub{ Mojo::Util::trim $_->text });
 }
 
