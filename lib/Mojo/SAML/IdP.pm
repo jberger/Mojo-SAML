@@ -3,7 +3,9 @@ package Mojo::SAML::IdP;
 use Mojo::Base -base;
 
 use Mojo::DOM;
+use Mojo::File;
 use Mojo::UserAgent;
+use Mojo::Util;
 use Scalar::Util ();
 
 my $isa = sub {
@@ -31,10 +33,17 @@ sub entity {
   return $self->metadata->at(qq<EntityDescriptor[entityID="$id"]>) // die 'EntityDescriptor not found';
 }
 
+sub from_file {
+  my ($self, $file) = @_;
+  $file = Mojo::File->new("$file")
+    unless $file->$isa('Mojo::File');
+  return $self->from_xml(Mojo::Util::decode 'UTF-8', $file->slurp);
+}
+
 sub from_url {
   my ($self, $url) = @_;
-  my $dom = $self->ua->get($url)->result->body;
-  return $self->from_xml($dom);
+  my $xml = $self->ua->get($url)->result->body;
+  return $self->from_xml($xml);
 }
 
 sub from_xml {
