@@ -58,7 +58,10 @@ sub has_signature {
   return !!$dom->at('ds|Signature ds|Reference', %ns);
 }
 
-sub sign { _signature(0, @_) }
+sub sign {
+  my ($xml, $key) = @_;
+  _signature(0, _digest(0, $xml), $key);
+}
 
 sub validate {
   my $dom = shift;
@@ -184,11 +187,7 @@ sub _sign_rsa {
 
   Carp::croak 'No X509Certificate element found for cert storage'
     unless my $elem = $dom->at('ds|KeyInfo > ds|X509Data > ds|X509Certificate', %ns);
-  my $cert = $key->get_public_key_x509_string;
-  $cert =~ s/-----[^-]*-----//gm;
-  $elem->content($cert);
-
-  return Mojo::Util::b64_encode($key->sign(Mojo::Util::trim $text));
+  return Mojo::Util::b64_encode($key->sign(Mojo::Util::trim $text), '');
 }
 
 sub _signature {
@@ -221,7 +220,7 @@ sub _signature {
 
   unless ($validate) {
     Carp::croak 'No SignatureValue present'
-      unless my $sig = $dom->at('ds|SignatureValue:not(:empty)', %ns);
+      unless my $sig = $dom->at('ds|SignatureValue', %ns);
     $sig->content($value);
   }
 
