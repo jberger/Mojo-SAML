@@ -10,3 +10,5 @@ say $idp->key_for('signing');
 say $idp->name_id_format('transient');
 say $idp->default_id_format;
 
+say $idp->validate_signature;
+
