@@ -8,6 +8,7 @@ use Mojo::DOM;
 use Mojo::File;
 use Mojo::UserAgent;
 use Mojo::Util;
+use Mojo::URL;
 use Scalar::Util ();
 
 my $isa = sub {
@@ -57,10 +58,9 @@ sub from_xml {
 
 sub location_for {
   my ($self, $service, $binding) = @_;
-  $binding = "urn:oasis:names:tc:SAML:2.0:bindings:$binding"
-    unless $binding =~ /^\Qurn:oasis:names:tc:SAML:2.0:bindings:/;
+  $binding = Mojo::SAML::Names::binding($binding);
   my $elem = $self->entity->at(qq!md|IDPSSODescriptor > md|${service}[Binding="$binding"][Location]!, %ns) || {};
-  return $elem->{Location};
+  return Mojo::URL->new($elem->{Location});
 }
 
 sub key_for {

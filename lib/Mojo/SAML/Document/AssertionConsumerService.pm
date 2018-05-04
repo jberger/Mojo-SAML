@@ -2,6 +2,8 @@ package Mojo::SAML::Document::AssertionConsumerService;
 
 use Mojo::Base 'Mojo::SAML::Document';
 
+use Mojo::SAML::Names;
+
 has template => sub { shift->build_template(<<'XML') };
 %= tag AssertionConsumerService => $self->tag_attrs
 XML
@@ -11,12 +13,6 @@ has [qw/response_location is_default/];
 has binding => sub { Carp::croak 'binding is required' };
 has location => sub { Carp::croak 'location is required' };
 
-my %bindings = (
-  SOAP => 'urn:oasis:names:tc:SAML:2.0:bindings:SOAP',
-  'HTTP-Redirect' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
-  'HTTP-POST' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST',
-);
-
 sub tag_attrs {
   my $self = shift;
   my $binding = $self->binding;
@@ -24,7 +20,7 @@ sub tag_attrs {
     xmlns => 'urn:oasis:names:tc:SAML:2.0:metadata',
     index => $self->index,
     Location => $self->location,
-    Binding => $bindings{$binding} // $binding,
+    Binding => Mojo::SAML::Names::binding($binding),
   );
 
   if (defined(my $res = $self->response_location)) {

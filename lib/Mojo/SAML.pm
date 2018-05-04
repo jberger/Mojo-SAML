@@ -5,6 +5,7 @@ BEGIN {
   @doc_types = (qw/
     KeyInfo KeyDescriptor Organization ContactPerson
     AssertionConsumerService SPSSODescriptor EntityDescriptor
+    AuthnRequest NameIDPolicy
   /);
 
   for my $type (@doc_types) {
