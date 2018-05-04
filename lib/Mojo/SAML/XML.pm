@@ -63,7 +63,7 @@ sub sign {
   _signature(0, _digest(0, $xml), $key);
 }
 
-sub validate {
+sub verify {
   my $dom = shift;
   my $ret = eval { _digest(1, $dom); 1 };
   warn "$@" if $@;
@@ -93,14 +93,14 @@ sub _clean_cert {
 }
 
 sub _digest {
-  my ($validate, $dom) = @_;
+  my ($verify, $dom) = @_;
   $dom = _dom($dom)
     unless $dom->isa('Mojo::DOM');
   Carp::croak 'No Signature section found'
     unless my $sig = $dom->at('ds|Signature', %ns);
 
   my $refs = $sig->find('ds|Reference', %ns);
-  Carp::croak 'Nothing to validate'
+  Carp::croak 'Nothing to verify'
     unless $refs->size;
 
   $refs->each(sub{
@@ -127,7 +127,7 @@ sub _digest {
     my $value = $ref->at('ds|DigestValue', %ns);
 
     if ($value) {
-      if ($value->matches(':empty') && !$validate) {
+      if ($value->matches(':empty') && !$verify) {
         $value->content($digest);
       } else {
         $value = Mojo::Util::trim($value->text);
@@ -138,7 +138,7 @@ sub _digest {
       # Originally this method could create the tag, but I want to enforce that
       # the structure come from the document itself
 
-      Carp::croak "No DigestValue exists"; # if $validate;
+      Carp::croak "No DigestValue exists"; # if $verify;
       #my $tag = $ref->tag;
       #$tag =~ s/Reference/DigestValue/; # preserve prefix
       #$ref->append_content("<$tag>$digest</$tag>");
@@ -177,8 +177,8 @@ sub _mk_canon {
 }
 
 sub _rsa {
-  my ($algo, $validate, $text, $dom, $key) = @_;
-  return $validate ? _validate_rsa($algo, $text, $dom, $key) : _sign_rsa($algo, $text, $dom, $key);
+  my ($algo, $verify, $text, $dom, $key) = @_;
+  return $verify ? _verify_rsa($algo, $text, $dom, $key) : _sign_rsa($algo, $text, $dom, $key);
 }
 
 sub _sign_rsa {
@@ -191,13 +191,13 @@ sub _sign_rsa {
 }
 
 sub _signature {
-  my ($validate, $dom, $key) = @_;
+  my ($verify, $dom, $key) = @_;
   $dom = _dom($dom)
     unless $dom->$isa('Mojo::DOM');
   Carp::croak 'No Signature section found'
     unless my $elem = $dom->at('ds|Signature', %ns);
 
-  Carp::croak 'Nothing to validate'
+  Carp::croak 'Nothing to verify'
     unless $elem->find('ds|Reference > ds|DigestValue:not(:empty)', %ns)->size;
 
   Carp::croak 'No CanonicalizationMethod is specified'
@@ -216,9 +216,9 @@ sub _signature {
   }
 
   my $canon = _do_action($c_method, $siginfo);
-  my $value = _do_action($s_method, $validate, $canon, $elem, $key);
+  my $value = _do_action($s_method, $verify, $canon, $elem, $key);
 
-  unless ($validate) {
+  unless ($verify) {
     Carp::croak 'No SignatureValue present'
       unless my $sig = $dom->at('ds|SignatureValue', %ns);
     $sig->content($value);
@@ -227,7 +227,7 @@ sub _signature {
   return $dom;
 }
 
-sub _validate_rsa {
+sub _verify_rsa {
   my ($algo, $text, $dom, $key) = @_;
   unless ($key) {
     Carp::croak 'No X509Certificate element found for cert storage'
@@ -245,7 +245,7 @@ sub _validate_rsa {
     unless my $sig = $dom->at('ds|SignatureValue:not(:empty)', %ns);
   $sig = Mojo::Util::b64_decode($sig->text);
 
-  Carp::croak 'Signature does not validate'
+  Carp::croak 'Signature does not verify'
     unless $key->verify($text, $sig);
 
   return $sig;

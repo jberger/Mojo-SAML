@@ -93,11 +93,11 @@ sub default_id_format {
   return $formats->[0];
 }
 
-sub validate_signature {
+sub verify_signature {
   my $self = shift;
   my $dom = $self->metadata;
   return undef unless Mojo::SAML::XML::has_signature($dom);
-  return Mojo::SAML::XML::validate($dom);
+  return Mojo::SAML::XML::verify($dom);
 }
 
 1;
