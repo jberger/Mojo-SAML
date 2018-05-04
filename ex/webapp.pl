@@ -11,6 +11,24 @@ use Mojo::SAML ':docs';
 use Mojo::SAML::IdP;
 use Mojo::Util;
 
+=pod
+
+  $ openssl genrsa -out demo.key 2048
+  $ openssl req -new -x509 -key demo.key -out demo.cer -days 365
+
+  # webapp.conf
+  {
+    SAML => {
+      key => 'path/to/demo.key',
+      cert => 'path/to/demo.cert',
+      idp => 'path/to/remote_idp.xml',
+      location => 'https://demo.example.com/saml',
+      entity_id => 'my-entity-id', # often the same as location
+    }
+  }
+
+=cut
+
 my $config = app->plugin('Config');
 
 my $key = Crypt::OpenSSL::RSA->new_private_key(path($config->{SAML}{key})->slurp);
