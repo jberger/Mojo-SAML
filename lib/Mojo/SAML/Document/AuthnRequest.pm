@@ -12,13 +12,19 @@ has template => sub { shift->build_template(<<'XML') };
   % if (my $policy = $self->nameid_policy) {
   <%= $policy %>
   % }
+  <samlp:RequestedAuthnContext Comparison="exact">
+    <saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport</saml:AuthnContextClassRef>
+  </samlp:RequestedAuthnContext>
 % end
 XML
 
 has id => sub { 'MOJOSAML_' . shift->get_guid };
 has issue_instant => sub { shift->get_instant };
-has [qw/assertion_consumer_service_index assertion_consumer_service_url
-        protocol_binding provider_name is_passive force_authn issuer nameid_policy/];
+has [qw/
+  assertion_consumer_service_index assertion_consumer_service_url
+  protocol_binding provider_name destination
+  is_passive force_authn issuer nameid_policy
+/];
 
 sub before_render {
   my $self = shift;
@@ -49,6 +55,9 @@ sub tag_attrs {
   }
   if (defined(my $binding = $self->protocol_binding)) {
     push @attrs, ProtocolBinding => Mojo::SAML::Names::binding($binding);
+  }
+  if (defined(my $dest = $self->destination)) {
+    push @attrs, Destination => $dest;
   }
 
   if (defined(my $force = $self->force_authn)) {
