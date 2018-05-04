@@ -2,7 +2,7 @@ package Mojo::SAML::IdP;
 
 use Mojo::Base -base;
 
-use Mojo::SAML::XML;
+use Mojo::XMLSig;
 
 use Mojo::DOM;
 use Mojo::File;
@@ -68,7 +68,7 @@ sub key_for {
   $use = Mojo::Util::xml_escape $use;
   my $s = qq!md|IDPSSODescriptor > md|KeyDescriptor[use="$use"] > ds|KeyInfo > ds|X509Data > ds|X509Certificate!;
   return undef unless my $elem = $self->entity->at($s, %ns);
-  return Mojo::SAML::XML::_clean_cert($elem->text);
+  return Mojo::XMLSig::clean_cert($elem->text);
 }
 
 sub _formats {
@@ -96,8 +96,8 @@ sub default_id_format {
 sub verify_signature {
   my $self = shift;
   my $dom = $self->metadata;
-  return undef unless Mojo::SAML::XML::has_signature($dom);
-  return Mojo::SAML::XML::verify($dom);
+  return undef unless Mojo::XMLSig::has_signature($dom);
+  return Mojo::XMLSig::verify($dom);
 }
 
 1;

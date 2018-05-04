@@ -1,4 +1,4 @@
-package Mojo::SAML::XML;
+package Mojo::XMLSig;
 
 use Mojo::Base -strict;
 
@@ -12,12 +12,7 @@ my $isa = sub {
   my ($obj, $class) = @_;
   Scalar::Util::blessed($obj) && $obj->isa($class);
 };
-my %ns = (
-  md => 'urn:oasis:names:tc:SAML:2.0:metadata',
-  ds => 'http://www.w3.org/2000/09/xmldsig#',
-  saml => 'urn:oasis:names:tc:SAML:2.0:assertion',
-  samlp => 'urn:oasis:names:tc:SAML:2.0:protocol',
-);
+my %ns = (ds => 'http://www.w3.org/2000/09/xmldsig#');
 
 my %actions = (
   # xml
@@ -49,13 +44,22 @@ my %actions = (
   'http://www.w3.org/2001/04/xmldsig-more#rsa-sha512' => sub { _rsa(sha512 => @_) },
 );
 
+sub clean_cert {
+  my $cert = shift;
+  $cert =~ s/\n//g;
+  $cert = Mojo::Util::trim $cert;
+  $cert = Mojo::Util::b64_encode(Mojo::Util::b64_decode($cert), '');
+  $cert = "-----BEGIN CERTIFICATE-----\n$cert\n-----END CERTIFICATE-----\n";
+  return $cert;
+}
+
 sub digest { _digest(0, @_) }
 
 sub has_signature {
   my $dom = shift;
   $dom = _dom($dom)
     unless $dom->isa('Mojo::DOM');
-  return !!$dom->at('ds|Signature ds|Reference', %ns);
+  return !!$dom->at('ds|Signature ds|SignatureValue:not(:empty)', %ns);
 }
 
 sub sign {
@@ -82,15 +86,6 @@ my $set_algo = sub {
   $key->$method;
   return $key;
 };
-
-sub _clean_cert {
-  my $cert = shift;
-  $cert =~ s/\n//g;
-  $cert = Mojo::Util::trim $cert;
-  $cert = Mojo::Util::b64_encode(Mojo::Util::b64_decode($cert), '');
-  $cert = "-----BEGIN CERTIFICATE-----\n$cert\n-----END CERTIFICATE-----\n";
-  return $cert;
-}
 
 sub _digest {
   my ($verify, $dom) = @_;
@@ -232,7 +227,7 @@ sub _verify_rsa {
   unless ($key) {
     Carp::croak 'No X509Certificate element found for cert storage'
       unless my $elem = $dom->at('ds|KeyInfo > ds|X509Data > ds|X509Certificate:not(:empty)', %ns);
-    my $cert = _clean_cert($elem->text);
+    my $cert = clean_cert($elem->text);
 
     require Crypt::OpenSSL::X509;
     require Crypt::OpenSSL::RSA;

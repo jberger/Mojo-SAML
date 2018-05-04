@@ -2,7 +2,7 @@ package Mojo::SAML::Document::EntityDescriptor;
 
 use Mojo::Base 'Mojo::SAML::Document';
 
-use Mojo::SAML::XML;
+use Mojo::XMLSig;
 use Mojo::SAML::Document::Signature;
 
 use Crypt::OpenSSL::Random;
@@ -54,7 +54,7 @@ sub before_render {
 
 sub after_render {
   my ($self, $xml) = @_;
-  return Mojo::SAML::XML::sign("$xml", $self->key);
+  return Mojo::XMLSig::sign("$xml", $self->key);
 }
 
 

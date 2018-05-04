@@ -47,7 +47,7 @@ my $entity = EntityDescriptor->new(
   key_info => $key_info,
 );
 my $my_meta = "$entity";
-die 'Does not verify' unless Mojo::SAML::XML::verify($my_meta);
+die 'Does not verify' unless Mojo::XMLSig::verify($my_meta);
 
 get '/saml/descriptor' => { text => $my_meta, format => 'xml' };
 
