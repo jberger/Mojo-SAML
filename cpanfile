@@ -6,3 +6,8 @@ requires 'Data::GUID';
 requires 'Digest::SHA';
 requires 'XML::CanonicalizeXML';
 requires 'Compress::Raw::Zlib';
+
+on develop => sub {
+  requires 'App::ModuleBuildTiny';
+};
+
