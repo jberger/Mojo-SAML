@@ -48,7 +48,8 @@ sub clean_cert {
   my $cert = shift;
   $cert =~ s/\n//g;
   $cert = Mojo::Util::trim $cert;
-  $cert = Mojo::Util::b64_encode(Mojo::Util::b64_decode($cert), '');
+  $cert = Mojo::Util::b64_encode(Mojo::Util::b64_decode($cert), "\n");
+  $cert = Mojo::Util::trim $cert;
   $cert = "-----BEGIN CERTIFICATE-----\n$cert\n-----END CERTIFICATE-----\n";
   return $cert;
 }
