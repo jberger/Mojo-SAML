@@ -5,7 +5,6 @@ use Mojolicious::Lite;
 
 use Crypt::OpenSSL::RSA;
 use Crypt::OpenSSL::X509;
-use Data::GUID;
 use Mojo::File 'path';
 use Mojo::SAML ':docs';
 use Mojo::SAML::IdP;

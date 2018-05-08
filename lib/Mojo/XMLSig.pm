@@ -249,4 +249,119 @@ sub _verify_rsa {
 
 1;
 
+=head1 NAME
+
+Mojo::XMLSig - An implementation of XML-Sig using the Mojo::Toolkit
+
+=head1 SYNOPSIS
+
+  use Mojo::XMLSig;
+
+  # sign
+  my $xml = ...;
+  my $key = Crypt::OpenSSL::RSA->new_private_key(...);
+  my $signed = Mojo::XMLSig::sign($xml, $key);
+
+  # verify using an embedded certificate
+  my $verified = Mojo::XMLSig::verify($signed);
+
+  # verify using a known public certificate
+  my $pub = Crypt::OpenSSL::RSA->new_public_key(...);
+  my $verified = Mojo::XMLSig::verify($signed, $pub);
+
+=head1 DESCRIPTION
+
+L<Mojo::XMLSig> is an implementation of the L<XML Signature Syntax and Processing Version 1.1|https://www.w3.org/TR/xmldsig-core1/> spec.
+It allows a user to sign and verify documents in XML format.
+This is a requirement for many SAML documents and recommended in nearly all others.
+
+It is important to note that module does not create any tags.
+Rather it relies on you passing in a document with the relevant sections included.
+It will then fill out the computed sections given the parameters and algorithms specified.
+In this way signing and verifying are actually quite similar.
+
+An example document to be signed could be as follows.
+
+  <Thing ID="abc123">
+    <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+      <ds:SignedInfo>
+        <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+        <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1" />
+        <ds:Reference URI="#abc123">
+          <ds:Transforms>
+            <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature" />
+            <ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+          </ds:Transforms>
+          <ds:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+          <ds:DigestValue></ds:DigestValue>
+        </ds:Reference>
+      </ds:SignedInfo>
+      <ds:SignatureValue></ds:SignatureValue>
+      <ds:KeyInfo>
+        <ds:X509Data>
+          <ds:X509Certificate>$cert</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </ds:Signature>
+
+    <Important>Cool Stuff</Important>
+  </Thing>
+
+where C<$cert> is an x509 certificate, base64 encoded (but typically stripped of all formatting), if embedding the certificate.
+Note that the KeyInfo section is not required if not embedding the certificate.
+
+Calling L</sign> on this document will return a new document with the DigestValue and SignatureValue elements populated.
+While multiple Reference tags are supported, if multiple Signature tags are provided only the first one will be used.
+
+Note that L<Mojo::SAML::Document::Signature> and other relevant documents can be used to produce the signature for you if need be.
+
+=head1 CAVEATS
+
+This implementation only covers RSA signing and cannot process XPath directives.
+Once other algorithms are implemented, the apis will accept more than just RSA keys.
+I'm sure there are plenty of other things it can't do too.
+
+=head1 FUNCTIONS
+
+L<Mojo::XMLSig> is current only functions (though an OO interface is a possibility in the future).
+It provides the following functions.
+
+=head2 clean_cert
+
+  my $cert = clean_cert($text);
+
+A helper function that takes a base64 encoded certificate and properly formats it for use by L<Crypt::OpenSSL::X509>.
+This is useful when extracting embedded certificates and is provided as public api for resuse in portions of L<Mojo::SAML>.
+
+=head2 digest
+
+  my $output_xml = digest($input_xml);
+
+This intermediate function is unlikely to be used by the end consumer, however it might be useful in validating certain documents.
+It injects the digested values of the Referenced sectioned into the DigestValue tags.
+If you don't know why you should use it, you probably don't need it.
+
+=head2 has_signature
+
+  my $boolean = has_signature($xml);
+
+Checks an XML document for the existence of a non-empty SignatureValue tag in the correct structure.
+
+=head2 sign
+
+  my $signed_xml = sign($xml, $key);
+
+Signs a given XML document using a given L<Crypt::OpenSSL::RSA> private key.
+
+=head2 verify
+
+  my $boolean = verify($xml);
+  my $boolean = verify($xml, $key);
+
+Verifies the signature of a given XML document.
+When passed a L<Crypt::OpenSSL::RSA> public key, it will verify it using that.
+If not passed a key, it will attempt to verify the document using an embedded key.
+
+For security purposes, verifying using a known and previously exchanged public key is far more preferred.
+Without this, all you can know is that the document hasn't been tampered with, not who signed it, since an attacker could have intercepted the document and modified both the contents and the signature.
 
