@@ -3,6 +3,7 @@ package Mojo::SAML::Document::KeyInfo;
 use Mojo::Base 'Mojo::SAML::Document';
 
 use Mojo::Template;
+use Mojo::XMLSig;
 
 my $isa = sub {
   my ($obj, $class) = @_;
@@ -32,9 +33,7 @@ sub x509_string {
   Carp::croak 'Unknown cert object type'
     unless defined $text;
 
-  $text =~ s/-----[^-]*-----//gm;
-  $text =~ s/[\r\n]//g;
-  return Mojo::Util::trim($text);
+  return Mojo::XMLSig::trim_cert($text);
 }
 
 1;

@@ -18,9 +18,7 @@ subtest 'create document, sign, and verify' => sub {
   my $pub  = Crypt::OpenSSL::RSA->new_public_key($x509->pubkey);
   my $key  = Crypt::OpenSSL::RSA->new_private_key(path('t/test.key')->slurp);
 
-  $cert =~ s/-----[^-]*-----//gm;
-  $cert =~ s/[\r\n]//g;
-  $cert = Mojo::Util::trim($cert);
+  $cert = Mojo::XMLSig::trim_cert($cert);
 
   my $xml = <<"XML";
 <Thing ID="abc123"><ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">

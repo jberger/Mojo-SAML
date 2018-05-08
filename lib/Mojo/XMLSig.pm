@@ -44,7 +44,9 @@ my %actions = (
   'http://www.w3.org/2001/04/xmldsig-more#rsa-sha512' => sub { _rsa(sha512 => @_) },
 );
 
-sub clean_cert {
+sub digest { _digest(0, @_) }
+
+sub format_cert {
   my $cert = shift;
   $cert =~ s/\n//g;
   $cert = Mojo::Util::trim $cert;
@@ -53,8 +55,6 @@ sub clean_cert {
   $cert = "-----BEGIN CERTIFICATE-----\n$cert\n-----END CERTIFICATE-----\n";
   return $cert;
 }
-
-sub digest { _digest(0, @_) }
 
 sub has_signature {
   my $dom = shift;
@@ -66,6 +66,13 @@ sub has_signature {
 sub sign {
   my ($xml, $key) = @_;
   _signature(0, _digest(0, $xml), $key);
+}
+
+sub trim_cert {
+  my $cert = shift;
+  $cert =~ s/-----[^-]*-----//gm;
+  $cert =~ s/[\r\n]//g;
+  return Mojo::Util::trim($cert);
 }
 
 sub verify {
@@ -228,7 +235,7 @@ sub _verify_rsa {
   unless ($key) {
     Carp::croak 'No X509Certificate element found for cert storage'
       unless my $elem = $dom->at('ds|KeyInfo > ds|X509Data > ds|X509Certificate:not(:empty)', %ns);
-    my $cert = clean_cert($elem->text);
+    my $cert = format_cert($elem->text);
 
     require Crypt::OpenSSL::X509;
     require Crypt::OpenSSL::RSA;
@@ -326,13 +333,6 @@ I'm sure there are plenty of other things it can't do too.
 L<Mojo::XMLSig> is current only functions (though an OO interface is a possibility in the future).
 It provides the following functions.
 
-=head2 clean_cert
-
-  my $cert = clean_cert($text);
-
-A helper function that takes a base64 encoded certificate and properly formats it for use by L<Crypt::OpenSSL::X509>.
-This is useful when extracting embedded certificates and is provided as public api for resuse in portions of L<Mojo::SAML>.
-
 =head2 digest
 
   my $output_xml = digest($input_xml);
@@ -340,6 +340,13 @@ This is useful when extracting embedded certificates and is provided as public a
 This intermediate function is unlikely to be used by the end consumer, however it might be useful in validating certain documents.
 It injects the digested values of the Referenced sectioned into the DigestValue tags.
 If you don't know why you should use it, you probably don't need it.
+
+=head2 format_cert
+
+  my $cert = format_cert($text);
+
+A helper function that takes a base64 encoded certificate and properly formats it for use by L<Crypt::OpenSSL::X509>.
+This is useful when extracting embedded certificates and is provided as public api for resuse in portions of L<Mojo::SAML>.
 
 =head2 has_signature
 
@@ -352,6 +359,13 @@ Checks an XML document for the existence of a non-empty SignatureValue tag in th
   my $signed_xml = sign($xml, $key);
 
 Signs a given XML document using a given L<Crypt::OpenSSL::RSA> private key.
+
+=head2 trim_cert
+
+  my $text = trim_cert($cert);
+
+A helper function that takes a base64 encoded certificate and strips it of formatting for embedding in an XML Signature.
+This is useful when extracting embedded certificates and is provided as public api for resuse in portions of L<Mojo::SAML>.
 
 =head2 verify
 

@@ -69,7 +69,7 @@ sub certificate_for {
   $use = Mojo::Util::xml_escape $use;
   my $s = qq!md|IDPSSODescriptor > md|KeyDescriptor[use="$use"] > ds|KeyInfo > ds|X509Data > ds|X509Certificate!;
   return undef unless my $elem = $self->entity->at($s, %ns);
-  my $cert = Mojo::XMLSig::clean_cert($elem->text);
+  my $cert = Mojo::XMLSig::format_cert($elem->text);
   return Crypt::OpenSSL::X509->new_from_string($cert);
 }
 
