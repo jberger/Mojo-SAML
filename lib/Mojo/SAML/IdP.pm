@@ -63,12 +63,21 @@ sub location_for {
   return Mojo::URL->new($elem->{Location});
 }
 
-sub key_for {
+sub certificate_for {
   my ($self, $use) = @_;
+  require Crypt::OpenSSL::X509;
   $use = Mojo::Util::xml_escape $use;
   my $s = qq!md|IDPSSODescriptor > md|KeyDescriptor[use="$use"] > ds|KeyInfo > ds|X509Data > ds|X509Certificate!;
   return undef unless my $elem = $self->entity->at($s, %ns);
-  return Mojo::XMLSig::clean_cert($elem->text);
+  my $cert = Mojo::XMLSig::clean_cert($elem->text);
+  return Crypt::OpenSSL::X509->new_from_string($cert);
+}
+
+sub public_key_for {
+  my ($self, $use) = @_;
+  require Crypt::OpenSSL::RSA;
+  my $cert = $self->certificate_for($use);
+  return Crypt::OpenSSL::RSA->new_public_key($cert->pubkey);
 }
 
 sub _formats {

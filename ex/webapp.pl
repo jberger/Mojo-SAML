@@ -34,6 +34,7 @@ my $config = app->plugin('Config');
 my $key = Crypt::OpenSSL::RSA->new_private_key(path($config->{SAML}{key})->slurp);
 my $cert = Crypt::OpenSSL::X509->new_from_string(path($config->{SAML}{cert})->slurp);
 my $idp = Mojo::SAML::IdP->new->from_file($config->{SAML}{idp});
+my $idp_pub_key = $idp->public_key_for('signing');
 my $entity_id = $config->{SAML}{entity_id};
 my $location = $config->{SAML}{location};
 
@@ -72,6 +73,10 @@ get '/saml/descriptor' => { text => $my_meta, format => 'xml' };
 any '/saml' => sub {
   my $c = shift;
   my $text = Mojo::Util::b64_decode($c->param('SAMLResponse'));
+  return $c->render(
+    text => 'Response did not verify',
+    status => 500,
+  ) unless Mojo::XMLSig::verify($text, $idp_pub_key);
   $c->render(text => $text, format => 'xml');
 };
 

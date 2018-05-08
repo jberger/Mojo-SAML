@@ -69,11 +69,11 @@ sub sign {
 }
 
 sub verify {
-  my $dom = shift;
+  my ($dom, $key) = @_;
   my $ret = eval { _digest(1, $dom); 1 };
   warn "$@" if $@;
   return 0 unless $ret;
-  $ret = eval { _signature(1, $dom); 1 };
+  $ret = eval { _signature(1, $dom, $key); 1 };
   warn "$@" if $@;
   return $ret ? 1 : 0;
 }
