@@ -12,7 +12,7 @@ use Mojo::Util;
 our @doc_types = (qw/
   KeyInfo KeyDescriptor Organization ContactPerson
   AssertionConsumerService SPSSODescriptor EntityDescriptor
-  AuthnRequest NameIDPolicy
+  AuthnRequest NameIDPolicy Signature
 /);
 
 for my $type (@doc_types) {
