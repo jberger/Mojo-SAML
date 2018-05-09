@@ -12,7 +12,7 @@ use Mojo::XMLSig;
 
 use overload bool => sub {1}, '""' => sub { $_[0]->to_string }, fallback => 1;
 
-has [qw/sign_with_key insert_signature/];
+has [qw/sign_with_key insert_signature insert_xml_declaration/];
 has template => sub { die 'template is required' };
 
 my $isa = sub {
@@ -28,6 +28,9 @@ sub after_render  {
   }
   if (my $key = $self->sign_with_key) {
     $xml = $self->after_render_sign($xml, $key);
+  }
+  if ($self->insert_xml_declaration) {
+    $xml = $self->after_render_insert_xml_declaration($xml);
   }
   return "$xml";
 }
@@ -49,6 +52,11 @@ sub after_render_insert_signature {
   }
   $root->prepend_content("$sig");
   return $dom;
+}
+
+sub after_render_insert_xml_declaration {
+  my ($self, $xml) = @_;
+  return qq!<?xml version="1.0"?>$xml!;
 }
 
 sub after_render_sign {
@@ -139,6 +147,13 @@ Optional.
 A signature document, likely an instance of L<Mojo::SAML::Docuemnt::Signature> to insert.
 See later methods for more description.
 
+=head2 insert_xml_declaration
+
+Optional, undefined (false) by default.
+If true the resulting rendered document will contain an XML declaration.
+This should only be set (if at all) on the outermost document snippet.
+See later methods for more description.
+
 =head2 sign_with_key
 
 Optional.
@@ -165,6 +180,7 @@ This method can be used to post-process the rendered document.
 
 The default implementation of this method calls L</after_render_insert_signature> if a signature is given in L</insert_signature>.
 If then calls L</after_render_sign> if a key is given in L</sign_with_key>.
+Finally it calls L</after_render_insert_xml_declaration> if L</insert_xml_declaration> is true.
 
 This default implementation allows any document to be signed during rendering by giving an appropriate document (likely a L<Mojo::SAML::Document::Signature>) and a key (an instance of L<Crypt::OpenSSL::RSA>).
 Note that you probably only want to sign once on a full document render (not once per snippet) so keep that in mind when composing your snippets.
@@ -176,6 +192,16 @@ Note that you probably only want to sign once on a full document render (not onc
 Called during the default L</after_render> implementation.
 It is provided here to allow overriding the insert by specific documents types.
 Note that this default implementation requires a L<Mojo::SAML::Document::Sigature> object when called and actually returns a L<Mojo::DOM> reprenting the parsed form of its input.
+
+Note that this is probably not that useful to call directly.
+
+=head2 after_render_insert_xml_declaration
+
+  $xml = $doc->after_render_insert_xml_declaration($xml);
+
+Called during the default L</after_render> implementation.
+It is provided here to allow overriding the insert by specific documents types.
+It prepends a standard XML declaration to the passed-in document.
 
 Note that this is probably not that useful to call directly.
 

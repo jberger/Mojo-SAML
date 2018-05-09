@@ -65,6 +65,7 @@ my $entity = EntityDescriptor->new(
   descriptors => [$sp],
   sign_with_key => $key,
   insert_signature => Signature->new(key_info => $key_info),
+  insert_xml_declaration => 1,
 );
 my $my_meta = "$entity";
 die 'Does not verify' unless Mojo::XMLSig::verify($my_meta);
