@@ -133,7 +133,7 @@ While intended as a base class, it can also be used directly for one-off snippet
 
 L<Mojo::SAML::Document> inherits all of the attributes from L<Mojo::Base> and implements the following new ones.
 
-=head2 include_signature
+=head2 insert_signature
 
 Optional.
 A signature document, likely an instance of L<Mojo::SAML::Docuemnt::Signature> to insert.
