@@ -34,8 +34,8 @@ my $key = Crypt::OpenSSL::RSA->new_private_key(path($config->{SAML}{key})->slurp
 my $cert = Crypt::OpenSSL::X509->new_from_string(path($config->{SAML}{cert})->slurp);
 my $idp = Mojo::SAML::IdP->new->from_file($config->{SAML}{idp});
 my $idp_pub_key = $idp->public_key_for('signing');
-my $entity_id = $config->{SAML}{entity_id};
 my $location = $config->{SAML}{location};
+my $entity_id = $config->{SAML}{entity_id} // $location;
 
 my $key_info = KeyInfo->new(cert => $cert);
 my $key_desc = KeyDescriptor->new(
@@ -44,11 +44,13 @@ my $key_desc = KeyDescriptor->new(
 );
 my $post = AssertionConsumerService->new(
   index    => 0,
+  is_default => 0,
   binding  => 'HTTP-POST',
   location => $location,
 );
 my $redir = AssertionConsumerService->new(
   index    => 1,
+  is_default => 0,
   binding  => 'HTTP-Redirect',
   location => $location,
 );
@@ -84,7 +86,7 @@ helper build_auth_req => sub {
   $c->session->{target} = $c->req->url;
   my $url = $idp->location_for(SingleSignOnService => 'HTTP-Redirect');
   my $req = AuthnRequest->new(
-    issuer => $c->config->{SAML}{entity_id},
+    issuer => $entity_id,
     assertion_consumer_service_index => 0,
     is_passive => 0,
     nameid_policy => NameIDPolicy->new(format => 'unspecified'),

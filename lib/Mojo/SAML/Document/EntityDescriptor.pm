@@ -38,6 +38,8 @@ sub tag_attrs {
 
 sub before_render {
   my $self = shift;
+  Carp::croak 'entity_id must be defined'
+    unless defined($self->entity_id);
   for my $method (qw/descriptors/) {
     Carp::croak "$method cannot be empty" unless @{$self->$method};
   }
