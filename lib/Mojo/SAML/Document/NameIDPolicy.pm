@@ -64,7 +64,7 @@ A template specific to the document type.
 
 =head1 METHODS
 
-L</Mojo::SAML::Document::NameIDPolicy> inherits all methods from L<Mojo::SAML::Document> and implements the following new ones.
+L<Mojo::SAML::Document::NameIDPolicy> inherits all methods from L<Mojo::SAML::Document> and implements the following new ones.
 
 =head2 tag_attrs
 

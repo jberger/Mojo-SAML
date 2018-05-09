@@ -90,7 +90,7 @@ Speficies the time at which the document should no longer be considered valid.
 
 =head1 METHODS
 
-L</Mojo::SAML::Document::EntityDescriptor> inherits all methods from L<Mojo::SAML::Document> and implements the following new ones.
+L<Mojo::SAML::Document::EntityDescriptor> inherits all methods from L<Mojo::SAML::Document> and implements the following new ones.
 
 =head2 before_render
 
