@@ -39,6 +39,39 @@ sub before_render {
   }
 }
 
-
 1;
+
+=head1 NAME
+
+Mojo::SAML::Document::Signature
+
+=head1 DESCRIPTION
+
+Represents an Signature XML-Sig tag
+
+=head1 ATTRIBUTES
+
+L<Mojo::SAML::Document::Signature> inherits all attributes from L<Mojo::SAML::Document> and implements the following new ones.
+
+=head2 key_info
+
+Optional.
+An instance of L<Mojo::SAML::Document::KeyInfo> to be included in the signature.
+
+=head2 references
+
+An array reference of C<ID> attributes of elements to be referenced (and thus signed) by the signature.
+Must not be empty at render time.
+
+=head2 template
+
+A template specific to the document type.
+
+=head1 METHODS
+
+L</Mojo::SAML::Document::Signature> inherits all methods from L<Mojo::SAML::Document> and implements the following new ones.
+
+=head2 before_render
+
+Enforces that L</references> is not empty at render time.
 

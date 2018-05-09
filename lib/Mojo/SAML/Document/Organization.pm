@@ -27,3 +27,42 @@ sub before_render {
 
 1;
 
+=head1 NAME
+
+Mojo::SAML::Document::Organization
+
+=head1 DESCRIPTION
+
+Represents an Organization SAML metadata tag
+
+=head1 ATTRIBUTES
+
+L<Mojo::SAML::Document::Organization> inherits all attributes from L<Mojo::SAML::Document> and implements the following new ones.
+
+=head2 display_names
+
+An array reference containing the display names (human readable) of the organization.
+Must not be empty at render time.
+
+=head2 names
+
+An array reference containing the machine readable name of the organization.
+Must not be empty at render time.
+
+=head2 template
+
+A template specific to the document type.
+
+=head2 urls
+
+An array reference containing the urls of the organization.
+Must not be empty at render time.
+
+=head1 METHODS
+
+L</Mojo::SAML::Document::Organization> inherits all methods from L<Mojo::SAML::Document> and implements the following new ones.
+
+=head2 before_render
+
+Enforces that L</display_names>, L</names>, and L</urls> are not empty at render time.
+

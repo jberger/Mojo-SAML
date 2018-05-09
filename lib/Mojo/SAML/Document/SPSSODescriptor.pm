@@ -36,3 +36,52 @@ sub before_render {
 
 1;
 
+=head1 NAME
+
+Mojo::SAML::Document::SPSSODescriptor
+
+=head1 DESCRIPTION
+
+Represents an SPSSODescriptor SAML metadata tag
+
+=head1 ATTRIBUTES
+
+L<Mojo::SAML::Document::SPSSODescriptor> inherits all attributes from L<Mojo::SAML::Document> and implements the following new ones.
+
+=head2 authn_requests_signed
+
+Optional.
+A boolean specifying whether this service signs authn requests.
+Defaults to false.
+
+=head2 want_assertions_signed
+
+Optional.
+A boolean specifying whether this service requires assertions to be signed.
+Defaults to false.
+
+=head2 key_descriptors
+
+An array reference of L<Mojo::SAML::Document::KeyDescriptor> objects containing descriptors of keys used by this service.
+
+=head2 assertion_consumer_services
+
+An array reference of L<Mojo::SAML::Document::AssertionConsumerService> elements.
+Must not be empty at render time.
+
+=head2 nameid_format
+
+An array reference of nameid formats that this service understands.
+
+=head2 template
+
+A template specific to the document type.
+
+=head1 METHODS
+
+L</Mojo::SAML::Document::SPSSODescriptor> inherits all methods from L<Mojo::SAML::Document> and implements the following new ones.
+
+=head2 before_render
+
+Enforces that L</assertion_consumer_services> is not empty at render time.
+

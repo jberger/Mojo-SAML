@@ -38,3 +38,39 @@ sub x509_string {
 
 1;
 
+=head1 NAME
+
+Mojo::SAML::Document::KeyInfo
+
+=head1 DESCRIPTION
+
+Represents an KeyInfo XML-Sig tag
+
+=head1 ATTRIBUTES
+
+L<Mojo::SAML::Document::KeyInfo> inherits all attributes from L<Mojo::SAML::Document> and implements the following new ones.
+
+=head2 cert
+
+Optional.
+If given, it must be an instance of L<Crypt::OpenSSL::X509>.
+If not given, the tag is still generated, however, the content of the X509Certificate tag will be empty.
+It may later be filled in via some signing process.
+
+=head2 name
+
+Optional.
+The certificate name, used by some applications to distinguish between possible certificates.
+
+=head2 template
+
+A template specific to the document type.
+
+=head1 METHODS
+
+L</Mojo::SAML::Document::KeyInfo> inherits all methods from L<Mojo::SAML::Document> and implements the following new ones.
+
+=head2 x509_string
+
+If the L</cert> is given, this method formats and returns it for inserting into the X509Certificate tag body.
+
