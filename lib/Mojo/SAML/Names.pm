@@ -4,7 +4,22 @@ use Mojo::Base -strict;
 use Carp ();
 use Exporter 'import';
 
-our @EXPORT_OK = (qw/binding nameid_format/);
+our @EXPORT_OK = (qw/attrname_format binding nameid_format/);
+
+my %attrname_format_aliases = (
+  unspecified => 'urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified',
+  uri => 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri',
+  basic => 'urn:oasis:names:tc:SAML:2.0:attrname-format:basic',
+);
+my @attrname_formats = values %attrname_format_aliases;
+my %valid_attrname_formats; @valid_attrname_formats{@attrname_formats} = (1) x @attrname_formats;
+
+sub attrname_format {
+  my ($in, $lax) = @_;
+  return $attrname_format_aliases{$in} if exists $attrname_format_aliases{$in};
+  return $in if $valid_attrname_formats{$in} || $lax;
+  Carp::croak "$in is not a valid attrname format (or alias)";
+}
 
 my %binding_aliases = (
   SOAP => 'urn:oasis:names:tc:SAML:2.0:bindings:SOAP',
@@ -55,6 +70,19 @@ This modules contains functions that provide qualified version of from short nam
 =head1 FUNCTIONS
 
 L<Mojo::SAML::Names> exports no functions by default but exports any of the following upon request.
+
+=head2 attrname_format
+
+  $name = attrname_format($name);
+  $name = attrname_format($name, $lax);
+
+Qualify an attrname format used by SAML.
+Given a short or qualified name return the qualified name.
+If the fully qualified name is not known the function throws an exception unless the lax flag is true.
+
+  unspecified => 'urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified'
+  uri => 'urn:oasis:names:tc:SAML:2.0:attrname-format:uri'
+  basic => 'urn:oasis:names:tc:SAML:2.0:attrname-format:basic'
 
 =head2 binding
 

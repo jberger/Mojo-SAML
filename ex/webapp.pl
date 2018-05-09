@@ -54,9 +54,23 @@ my $redir = AssertionConsumerService->new(
   binding  => 'HTTP-Redirect',
   location => $location,
 );
+my $attr_srv = AttributeConsumingService->new(
+  index => 0,
+  is_default => 1,
+  service_names => ['Standard Attribute Service'],
+  requested_attributes => [
+    RequestedAttribute->new(
+      name => 'urn:oid:1.3.6.1.4.1.5923.1.1.1.7',
+      nameid_format => 'uri',
+      friendly_name => 'entitlement',
+      is_required => 0,
+    ),
+  ],
+);
 my $sp = SPSSODescriptor->new(
   key_descriptors => [$key_desc],
   assertion_consumer_services => [$post, $redir],
+  attribute_consuming_services => [$attr_srv],
   nameid_format => [qw/unspecified/],
 );
 my $entity = EntityDescriptor->new(

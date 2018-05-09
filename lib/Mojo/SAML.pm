@@ -11,6 +11,7 @@ use Mojo::Util;
 
 our @doc_types = (qw/
   AssertionConsumerService
+  AttributeConsumingService
   AuthnRequest
   ContactPerson
   EntityDescriptor
@@ -18,6 +19,7 @@ our @doc_types = (qw/
   KeyInfo
   NameIDPolicy
   Organization
+  RequestedAttribute
   Signature
   SPSSODescriptor
 /);
@@ -85,6 +87,10 @@ Their name is both the name of the subclass and the tag that they create.
 
 Constant shortcut to L<Mojo::SAML::Document::AssertionConsumerService>.
 
+=head3 AttributeConsumingService
+
+Constant shortcut to L<Mojo::SAML::Document::AttributeConsumingService>.
+
 =head3 AuthnRequest
 
 Constant shortcut to L<Mojo::SAML::Document::AuthnRequest>.
@@ -112,6 +118,10 @@ Constant shortcut to L<Mojo::SAML::Document::NameIDPolicy>.
 =head3 Organization
 
 Constant shortcut to L<Mojo::SAML::Document::Organization>.
+
+=head3 RequestedAttribute
+
+Constant shortcut to L<Mojo::SAML::Document::RequestedAttribute>.
 
 =head3 Signature
 

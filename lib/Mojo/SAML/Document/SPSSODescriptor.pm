@@ -21,11 +21,14 @@ has template => sub { shift->build_template(<<'XML') };
   % for my $service (@{ $self->assertion_consumer_services }) {
   <%= $service %>
   % }
+  % for my $service (@{ $self->attribute_consuming_services }) {
+  <%= $service %>
+  % }
 % end
 XML
 
 has [qw/authn_requests_signed want_assertions_signed/] => 0;
-has [qw/key_descriptors assertion_consumer_services nameid_format/] => sub { [] };
+has [qw/key_descriptors assertion_consumer_services attribute_consuming_services nameid_format/] => sub { [] };
 
 sub before_render {
   my $self = shift;
@@ -68,6 +71,10 @@ An array reference of L<Mojo::SAML::Document::KeyDescriptor> objects containing 
 
 An array reference of L<Mojo::SAML::Document::AssertionConsumerService> elements.
 Must not be empty at render time.
+
+=head2 attribute_consuming_services
+
+An array reference of L<Mojo::SAML::Document::AttributeConsumingService> elements.
 
 =head2 nameid_format
 
