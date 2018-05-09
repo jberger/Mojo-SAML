@@ -21,7 +21,6 @@ sub binding {
   Carp::croak "$in is not a valid binding (or alias)";
 }
 
-
 my %nameid_format_aliases = (
   unspecified => 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified',
   emailAddress => 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
@@ -43,4 +42,49 @@ sub nameid_format {
 }
 
 1;
+
+=head1 NAME
+
+Mojo::SAML::Names - Functions that qualify shortened names
+
+=head1 DESCRIPTION
+
+There are several types of names that come in fully qualified form that are too verbose for day to day use.
+This modules contains functions that provide qualified version of from short names.
+
+=head1 FUNCTIONS
+
+L<Mojo::SAML::Names> exports no functions by default but exports any of the following upon request.
+
+=head2 binding
+
+  $name = binding($name);
+  $name = binding($name, $lax);
+
+Qualify a binding used by SAML.
+Given a short or qualified name return the qualified name.
+If the fully qualified name is not known the function throws an exception unless the lax flag is true.
+
+  SOAP => 'urn:oasis:names:tc:SAML:2.0:bindings:SOAP'
+  'HTTP-Redirect' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
+  'HTTP-POST' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST'
+
+=head2 nameid_format
+
+  $name = nameid_format($name);
+  $name = nameid_format($name, $lax);
+
+Qualify a nameid format used by SAML.
+Given a short or qualified name return the qualified name.
+If the fully qualified name is not known the function throws an exception unless the lax flag is true.
+
+  unspecified => 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'
+  emailAddress => 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
+  X509SubjectName => 'urn:oasis:names:tc:SAML:1.1:nameid-format:X509SubjectName'
+  WindowsDomainQualifiedName => 'urn:oasis:names:tc:SAML:1.1:nameid-format:WindowsDomainQualifiedName'
+  kerberos => 'urn:oasis:names:tc:SAML:2.0:nameid-format:kerberos'
+  entity => 'urn:oasis:names:tc:SAML:2.0:nameid-format:entity'
+  persistent => 'urn:oasis:names:tc:SAML:2.0:nameid-format:persistent'
+  transient => 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient'
+
 
