@@ -131,7 +131,7 @@ Exports all of the above document type constants.
 
 While they aren't linked to from this module, some other modules that will likely be useful are:
 
-=head Mojo::SAML::Names
+=head2 Mojo::SAML::Names
 
 L<Mojo::SAML::Names> is a (fairly incomplete) list of naming conventions and standard used in SAML.
 
