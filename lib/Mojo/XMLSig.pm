@@ -258,7 +258,7 @@ sub _verify_rsa {
 
 =head1 NAME
 
-Mojo::XMLSig - An implementation of XML-Sig using the Mojo::Toolkit
+Mojo::XMLSig - An implementation of XML-Sig using the Mojo toolkit
 
 =head1 SYNOPSIS
 
