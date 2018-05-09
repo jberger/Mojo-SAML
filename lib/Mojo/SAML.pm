@@ -39,8 +39,6 @@ our @EXPORT_OK = @doc_types;
 
 Mojo::SAML - A SAML2 toolkit using the Mojo toolkit
 
-=head1 SYNOPSIS
-
 =head1 DESCRIPTION
 
 L<Mojo::SAML> is a project to build a SAML toolkit using the Mojo stack.
@@ -62,6 +60,13 @@ Users are encouraged to add those modules to their own dependencies in case they
 Currently data extraction and documentation are very much separate sets of code.
 It is not yet decided if this will continue or if some effort will be made to unify them.
 This is a large part of the concern for api stability.
+
+While most classes have API documentation, currently overall usage documentation is lacking.
+For the time being, examples can be seen in the C<ex/> directory within the source repository and/or distribution, especially C<ex/webapp.pl>.
+These examples will be modified as the API changes and eventually usage documentation should be written.
+
+L<Mojo::XMLSig> has some tests, the rest has precious few tests.
+There could always be more tests.
 
 All of this should be improvable.
 PRs and comments are most welcome.

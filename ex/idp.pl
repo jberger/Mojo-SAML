@@ -2,7 +2,8 @@ use Mojo::Base -strict;
 
 use Mojo::SAML::IdP;
 
-my $idp = Mojo::SAML::IdP->new->from_url('https://keycloak.jberger.pl/auth/realms/master/protocol/saml/descriptor');
+my $url = shift || die 'please pass in a url of an idp entity';
+my $idp = Mojo::SAML::IdP->new->from_url($url);
 
 say $idp->entity_id;
 say $idp->location_for('SingleSignOnService', 'HTTP-POST');
