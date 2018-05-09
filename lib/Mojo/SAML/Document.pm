@@ -211,7 +211,7 @@ The resulting template sets C<autoescape> to true which promotes good xml escapi
 It configures the template to shift off the invocant as C<$self> for use during the template.
 (Note that during L</to_string> or stringification no arguments are passed to the template rendering, so this is very useful.)
 
-Finally, it sets C<namespace> to C<Mojo::SAML::TemplateSandbox.
+Finally, it sets C<namespace> to C<Mojo::SAML::TemplateSandbox>.
 This namespace is prepopulated with L<Mojo::SAML::Names/binding> and L<Mojo::SAML::Names/nameid_format> functions as well as a version of L<Mojolicious::Plugins::TagHelpers/tag>.
 
 =head2 get_guid
