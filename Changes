@@ -1,5 +1,8 @@
 Revision history for Perl distribution Mojo-SAML
 
+0.03 2018-05-10
+  - Added extensions to EntityDescriptor
+
 0.02 2018-05-09
   - Fix several documentation problems
   - Add insert_xml_declaration to Document class
