@@ -62,6 +62,14 @@ sub entity {
   return $self->metadata->at(qq<EntityDescriptor[entityID="$id"]>) // Carp::croak 'EntityDescriptor not found';
 }
 
+sub from {
+  my ($self, $arg) = @_;
+  my $method = $arg =~ m{^https?://} ? 'from_url' :
+               $arg =~ m{\s*<}       ? 'from_xml' :
+                                       'from_file';
+  return $self->$method($arg);
+}
+
 sub from_file {
   my ($self, $file) = @_;
   $file = Mojo::File->new("$file")
@@ -199,6 +207,13 @@ Returns the first nameid format.
 Get the L<Mojo::DOM> instance for the entity identified by the L</entity_id>.
 This is used by many other methods for picking the entity information.
 
+=head2 from
+
+  my $entity = Mojo::SAML::Entity->new->from($input);
+
+Load L</metadata> from a generic input.
+Delegates to L</from_file>, L</from_url>, and L</from_xml> depending on the input.
+
 =head2 from_file
 
   my $entity = Mojo::SAML::Entity->new->from_file($path);
@@ -215,7 +230,7 @@ Return the instance, designed to chain with C<new>.
 
 =head2 from_xml
 
-  my $entity = Mojo::SAML::Entity->new->from_xml($url);
+  my $entity = Mojo::SAML::Entity->new->from_xml($xml);
 
 Load L</metadata> from a given string.
 Return the instance, designed to chain with C<new>.

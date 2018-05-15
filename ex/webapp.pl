@@ -32,7 +32,7 @@ my $config = app->plugin('Config');
 
 my $key = Crypt::OpenSSL::RSA->new_private_key(path($config->{SAML}{key})->slurp);
 my $cert = Crypt::OpenSSL::X509->new_from_string(path($config->{SAML}{cert})->slurp);
-my $idp = Mojo::SAML::IdP->new->from_file($config->{SAML}{idp});
+my $idp = Mojo::SAML::IdP->new->from($config->{SAML}{idp});
 my $idp_pub_key = $idp->public_key_for('signing');
 my $location = $config->{SAML}{location};
 my $entity_id = $config->{SAML}{entity_id} // $location;
