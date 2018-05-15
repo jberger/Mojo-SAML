@@ -1,11 +1,12 @@
 Revision history for Perl distribution Mojo-SAML
 
-0.05
+0.05 2018-05-15
   - Add Mojo::SAML::Entity class from IdP class
   - IdP class now inherits from Entity class
   - Add "from" method to Entity class
   - Add "role" method to Entity class
   - Add "role_type" attribte to Entity class
+  - Add Mojolicious::Plugin::SAML
 
 0.04 2018-05-14
   - Bugfix calling isa on non-references
