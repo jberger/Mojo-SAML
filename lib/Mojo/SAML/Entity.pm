@@ -20,6 +20,10 @@ my %ns = (
   md => 'urn:oasis:names:tc:SAML:2.0:metadata',
   ds => 'http://www.w3.org/2000/09/xmldsig#',
 );
+my %uses = (
+  encryption => 1,
+  signing    => 1,
+);
 
 has entity_id => sub {
   my $dom = shift->metadata;
@@ -34,9 +38,13 @@ has ua => sub { Mojo::UserAgent->new };
 
 sub certificate_for {
   my ($self, $use) = @_;
+  my $attr = ':not([use])';
+  if (defined $use) {
+    Carp::croak "Unknown certificate use $use" unless exists $uses{$use};
+    $attr = qq!:matches([use="$use"], $attr)!;
+  }
   require Crypt::OpenSSL::X509;
-  $use = Mojo::Util::xml_escape $use;
-  my $s = qq!md|KeyDescriptor[use="$use"] > ds|KeyInfo > ds|X509Data > ds|X509Certificate!;
+  my $s = qq!md|KeyDescriptor$attr > ds|KeyInfo > ds|X509Data > ds|X509Certificate!;
   return undef unless my $elem = $self->role->at($s, %ns);
   my $cert = Mojo::XMLSig::format_cert($elem->text);
   return Crypt::OpenSSL::X509->new_from_string($cert);
@@ -176,6 +184,7 @@ L<Mojo::SAML::Entity> inherits all of the methods from L<Mojo::Base> and impleme
   my $cert = $entity->certificate_for($use);
 
 Returns a C<Crypt::OpenSSL::X509> instance for the L</entity> and L</role> and a given use.
+Note that a certificate without a use will match any use.
 
 =head2 default_id_format
 
