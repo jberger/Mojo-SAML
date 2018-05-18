@@ -1,5 +1,8 @@
 Revision history for Perl distribution Mojo-SAML
 
+0.06 2018-05-18
+  - Bugfix in both saml.response_status and saml.response_success helpers
+
 0.05 2018-05-15
   - Add Mojo::SAML::Entity class from IdP class
   - IdP class now inherits from Entity class

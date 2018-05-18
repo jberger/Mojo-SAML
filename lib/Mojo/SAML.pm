@@ -2,7 +2,7 @@ package Mojo::SAML;
 
 use Mojo::Base -strict;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 $VERSION = eval $VERSION;
 
 use constant ();

@@ -113,7 +113,7 @@ sub register {
     return !!$dom->at('samlp|Response > samlp|Status > samlp|StatusCode[Value="urn:oasis:names:tc:SAML:2.0:status:Success"]', @ns);
   });
 
-  $app->helper('saml.response_success' => sub {
+  $app->helper('saml.response_status' => sub {
     my $c = shift;
     my $dom = $c->saml->response;
     return +($dom->at('samlp|Response > samlp|Status > samlp|StatusCode[Value]', @ns) || {})->{Value};
