@@ -4,6 +4,7 @@ use Mojo::Base -strict;
 
 use Carp ();
 use Digest::SHA;
+use Mojo::Collection 'c';
 use Mojo::DOM;
 use Mojo::Util;
 use XML::CanonicalizeXML;
@@ -115,6 +116,30 @@ sub _digest {
     my $clone = _dom($dom);
     Carp::croak "Cannot find element ID=$uri"
       unless my $elem = $clone->at(qq![ID="$uri"]!);
+
+    my $ns_re = qr/^([^:]+):/;
+    for my $e ($elem, $elem->find('*')->each) {
+      # tag namespace
+      if ($e->namespace) {
+        my $attr = $e->tag =~ $ns_re ? "xmlns:$1" : 'xmlns';
+        $e->attr($attr => $e->namespace);
+      }
+
+      # attribute namespaces
+      c(keys %{$e->attr})->map(sub{ $_ =~ $ns_re ? $1 : () })->each(sub{
+        return if $_ eq 'xmlns';
+        my $attr = "xmlns:$_";
+        return if exists $e->attr->{$attr};
+        my $parent = $e->parent;
+        PARENT: while ($parent) {
+          if (exists $parent->attr->{$attr}) {
+            $e->attr($attr => $parent->attr->{$attr});
+            last PARENT;
+          }
+          $parent = $parent->parent;
+        }
+      });
+    }
 
     $ref->find('ds|Transforms > ds|Transform', %ns)->each(sub{
       my $trans = shift->{Algorithm};
