@@ -156,9 +156,9 @@ sub _digest {
 
     if ($value) {
       if ($value->matches(':empty') && !$verify) {
-        $value->content($digest);
+        $value->content(Mojo::Util::b64_encode($digest, ''));
       } else {
-        $value = Mojo::Util::trim($value->text);
+        $value = Mojo::Util::b64_decode(Mojo::Util::trim($value->text));
         Carp::croak "Existing digest '$value' does not equal calculated value '$digest'"
           unless $value eq $digest;
       }
@@ -187,7 +187,7 @@ sub _dom { Mojo::DOM->new->xml(1)->parse("$_[0]") }
 
 sub _get_digest {
   my ($algo, $content) = @_;
-  my $digest = Digest::SHA->can("${algo}_base64")->($content);
+  my $digest = Digest::SHA->can($algo)->($content);
   while (length($digest) % 4) { $digest .= '=' }
   return $digest;
 }
