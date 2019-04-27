@@ -7,8 +7,6 @@ use Digest::SHA;
 use Mojo::DOM;
 use Mojo::Util;
 use XML::CanonicalizeXML;
-use Scalar::Util qw(blessed);
-use Data::Dumper;
 
 my $isa = sub {
   my ($obj, $class) = @_;
