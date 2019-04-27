@@ -7,6 +7,8 @@ use Digest::SHA;
 use Mojo::DOM;
 use Mojo::Util;
 use XML::CanonicalizeXML;
+use Scalar::Util qw(blessed);
+use Data::Dumper;
 
 my $isa = sub {
   my ($obj, $class) = @_;
@@ -56,6 +58,31 @@ sub format_cert {
   return $cert;
 }
 
+sub _find_all_ns {
+  my ($dom)=@_;
+
+  my $has={};
+  my $used={};
+  my $missing={};
+  my $all_ns={has=>$has,used=>$used,missing=>$missing};
+  $dom->find('*')->each(sub { 
+    my ($dom)=@_;
+    while(my ($key,$value)=each %{$dom->attr}) {
+      if($key=~ m/^xmlns:(.*)$/s) {
+        $has->{$1}=$value;
+      }
+    }
+    my $tag=$dom->tag;
+    if($tag=~ /^([^:]+):/s) {
+      $used->{$1}++;
+    }
+    while(my ($key,$value)=each %{$used}) {
+      $missing->{$key}++ unless exists $has->{$key};
+    }
+
+  });
+  return $all_ns;
+}
 sub has_signature {
   my $dom = shift;
   $dom = _dom($dom)
@@ -106,6 +133,12 @@ sub _digest {
   Carp::croak 'Nothing to verify'
     unless $refs->size;
 
+  # should work according to the docs.. but is broken?
+  #$dom->find('*[name^="xmlns:"]')->each(sub { 
+  my $all_ns=_find_all_ns($dom);
+  Carp::croak "xml document is missing the following xmlns:xxx declarations: ".join(',',sort keys %{$all_ns->{missing}})
+    if scalar(keys %{$all_ns->{missing}})!=0;
+  my $known_ns=$all_ns->{has};
   $refs->each(sub{
     my $ref = shift;
     my $uri = $ref->{URI};
@@ -113,11 +146,18 @@ sub _digest {
       unless $uri =~ s/^#//;
 
     my $clone = _dom($dom);
+
     Carp::croak "Cannot find element ID=$uri"
       unless my $elem = $clone->at(qq![ID="$uri"]!);
 
     $ref->find('ds|Transforms > ds|Transform', %ns)->each(sub{
       my $trans = shift->{Algorithm};
+      
+      my $missing=_find_all_ns($elem)->{missing};
+
+      while(my ($key,$value)=each %$missing) {
+        $elem->attr("xmlns:$key",$known_ns->{$key});
+      }
       $elem = _do_action($trans, $elem);
       Carp::croak "Transform $trans resulted in no value"
         unless defined $elem && length "$elem";
