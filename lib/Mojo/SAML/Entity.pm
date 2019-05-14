@@ -3,6 +3,7 @@ package Mojo::SAML::Entity;
 use Mojo::Base -base;
 
 use Mojo::XMLSig;
+use Mojo::SAML::Names;
 
 use Carp ();
 use Mojo::DOM;
