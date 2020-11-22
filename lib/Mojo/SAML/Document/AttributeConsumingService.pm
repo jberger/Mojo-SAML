@@ -72,7 +72,7 @@ Note that if no services are marked as default, the first one will be used as de
 
 =head2 lang
 
-The X<xml:lang> attribute value to apply to L</name> and L</service_name>
+The X<xml:lang> attribute value to apply to L</name> and L</service_names>
 Optional, defaults to C<en>.
 
 =head2 requested_attributes
