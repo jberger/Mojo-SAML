@@ -143,7 +143,7 @@ L<Mojo::SAML::Document> inherits all of the attributes from L<Mojo::Base> and im
 =head2 insert_signature
 
 Optional.
-A signature document, likely an instance of L<Mojo::SAML::Docuemnt::Signature> to insert.
+A signature document, likely an instance of L<Mojo::SAML::Document::Signature> to insert.
 See later methods for more description.
 
 =head2 insert_xml_declaration
