@@ -116,6 +116,19 @@ sub _digest {
     Carp::croak "Cannot find element ID=$uri"
       unless my $elem = $clone->at(qq![ID="$uri"]!);
 
+    # If our $elem does not contain namespaces declarations for its elements
+    # (and their attributes), inject them manually so that XML::CanonicalizeXML 
+    # parses it correctly.
+    $elem->descendant_nodes->map(sub { $_->tag, keys %{$_->attr} })->compact->map(sub { /^(.*?):/ ? $1 : undef })->compact->uniq->each(sub {
+        my $ns = shift;
+        if (!$elem->at("xmlns:$ns")) {
+            my $decl = $dom->at("[xmlns:$ns]");
+            if ($decl && $decl->attr("xmlns:$ns")) {
+                $elem->attr("xmlns:$ns" => $decl->attr("xmlns:$ns"));
+            }
+        }
+    });
+
     $ref->find('ds|Transforms > ds|Transform', %ns)->each(sub{
       my $trans = shift->{Algorithm};
       $elem = _do_action($trans, $elem);
@@ -131,9 +144,9 @@ sub _digest {
 
     if ($value) {
       if ($value->matches(':empty') && !$verify) {
-        $value->content($digest);
+        $value->content(Mojo::Util::b64_encode $digest, '');
       } else {
-        $value = Mojo::Util::trim($value->text);
+        $value = Mojo::Util::b64_decode Mojo::Util::trim $value->text;
         Carp::croak "Existing digest '$value' does not equal calculated value '$digest'"
           unless $value eq $digest;
       }
@@ -162,7 +175,7 @@ sub _dom { Mojo::DOM->new->xml(1)->parse("$_[0]") }
 
 sub _get_digest {
   my ($algo, $content) = @_;
-  my $digest = Digest::SHA->can("${algo}_base64")->($content);
+  my $digest = Digest::SHA->can($algo)->($content);
   while (length($digest) % 4) { $digest .= '=' }
   return $digest;
 }
@@ -373,9 +386,12 @@ This is useful when extracting embedded certificates and is provided as public a
   my $boolean = verify($xml, $key);
 
 Verifies the signature of a given XML document.
+If the document contains multiple signed sections, it returns true if all
+of them are signed, otherwise it will return false. If the document contains
+no signatures, it returns false.
+
 When passed a L<Crypt::OpenSSL::RSA> public key, it will verify it using that.
 If not passed a key, it will attempt to verify the document using an embedded key.
-
 For security purposes, verifying using a known and previously exchanged public key is far more preferred.
 Without this, all you can know is that the document hasn't been tampered with, not who signed it, since an attacker could have intercepted the document and modified both the contents and the signature.
 
